@@ -15,10 +15,40 @@
 # limitations under the License.
 #
 import webapp2
+import cgi
+
+from caesarbase import encrypt, rotate_character, alphabet_position
+
+
+def build_page(message_content):
+    page_heading = '<h2>Web Caesar</h2>'
+
+
+    form_content =  \
+        '<form method="post">' + \
+        '  <textarea name="message" style="height: 100px; width: 400px;">' + \
+        message_content + \
+        '  </textarea>' + \
+        '  <br>' + \
+        '  <input type="submit">' + \
+        '</form>'
+
+    return form_content
+
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        self.response.write('Hello world!')
+        basic_page = build_page("")
+        self.response.write(basic_page)
+
+    def post(self):
+        message = self.request.get("message")
+        # rotation_amount = self.request.get("
+        encrypted_msg = encrypt(message, 5)
+        escaped_msg = cgi.escape(encrypted_msg)
+        basic_page = build_page(escaped_msg)
+        self.response.write(basic_page)
+
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler)
