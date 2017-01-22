@@ -23,17 +23,25 @@ from caesarbase import encrypt, rotate_character, alphabet_position
 def build_page(message_content):
     page_heading = '<h2>Web Caesar</h2>'
 
+    rot_prompt = '<label>Rotate by:</label>'
+    rot_field = ('<input type="number" name="rot_amt" ' +
+                   'autofocus maxlength="10"><br><br>')
 
-    form_content =  \
-        '<form method="post">' + \
-        '  <textarea name="message" style="height: 100px; width: 400px;">' + \
-        message_content + \
-        '  </textarea>' + \
-        '  <br>' + \
-        '  <input type="submit">' + \
+    message_prompt = '<label>Type a message:</label><br><br>'
+
+    form_content =  (
+        '<form method="post">' + 
+        rot_prompt + rot_field + 
+        message_prompt +
+        '  <textarea name="message" rows="5" cols="45" maxlength="500">' + 
+        message_content + 
+        '  </textarea>' + 
+        '  <br><br>' + 
+        '  <input type="submit">' + 
         '</form>'
+    )
 
-    return form_content
+    return page_heading + form_content
 
 
 class MainHandler(webapp2.RequestHandler):
@@ -43,8 +51,12 @@ class MainHandler(webapp2.RequestHandler):
 
     def post(self):
         message = self.request.get("message")
-        # rotation_amount = self.request.get("
-        encrypted_msg = encrypt(message, 5)
+        rotation_amount = self.request.get("rot_amt")
+        if len(rotation_amount) > 0 and rotation_amount.lstrip('-').isnumeric():
+            rotation_amount = int(self.request.get("rot_amt"))
+        else:
+            rotation_amount = 0
+        encrypted_msg = encrypt(message, rotation_amount)
         escaped_msg = cgi.escape(encrypted_msg)
         basic_page = build_page(escaped_msg)
         self.response.write(basic_page)
